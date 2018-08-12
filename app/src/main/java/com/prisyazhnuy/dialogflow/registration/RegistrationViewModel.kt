@@ -1,4 +1,4 @@
-package com.prisyazhnuy.dialogflow
+package com.prisyazhnuy.dialogflow.registration
 
 import ai.api.AIConfiguration
 import ai.api.AIDataService
@@ -10,18 +10,29 @@ import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MutableLiveData
 import android.util.Log
+import com.prisyazhnuy.dialogflow.BuildConfig
+import com.prisyazhnuy.dialogflow.DialogflowIntent
+import com.prisyazhnuy.dialogflow.SimpleAIListener
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
 
-class MainViewModel(app: Application) : AndroidViewModel(app) {
+class RegistrationViewModel(app: Application) : AndroidViewModel(app) {
 
-    private val TAG = MainViewModel::class.java.simpleName
+    companion object {
+        private const val EMAIL_PARAM = "email"
+        private const val PHOME_PARAM = "phone-number"
+    }
+
+    private val TAG = RegistrationViewModel::class.java.simpleName
+
+    val emailLiveData = MutableLiveData<String>()
+    val phoneLiveData = MutableLiveData<String>()
+
 
     val speechLiveData = MutableLiveData<String>()
-    val dataLiveData = MutableLiveData<String>()
-    val intentLiveData = MutableLiveData<String>()
+    val unknownSpeechLiveData = MutableLiveData<String>()
 
     private val config by lazy {
         ai.api.android.AIConfiguration(BuildConfig.CLIENT_ACCESS_TOKEN,
@@ -57,15 +68,17 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             Log.i(TAG, "Code: $code, type: $errorType")
         }
         with(it.result) {
-            dataLiveData.value = fulfillment.speech
             Log.i(TAG, "Resolved query: $resolvedQuery")
             Log.i(TAG, "Action: $action")
             Log.i(TAG, "Speech: ${fulfillment.speech}")
-            Log.i(TAG, "Parameters: $parameters")
             metadata?.let { it ->
                 Log.i(TAG, "Metadata intent id: ${it.intentId}")
                 Log.i(TAG, "Intent name: ${it.intentName}")
-                intentLiveData.value = it.intentName
+                when (it.intentName) {
+                    DialogflowIntent.EMAIL.intent -> emailLiveData.value = parameters[EMAIL_PARAM]?.asString
+                    DialogflowIntent.PHONE_NUMBER.intent -> phoneLiveData.value = parameters[PHOME_PARAM]?.asString
+                    else -> unknownSpeechLiveData.value = fulfillment.speech
+                }
             }
         }
     }

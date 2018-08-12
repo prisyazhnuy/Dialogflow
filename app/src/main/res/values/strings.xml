@@ -2,4 +2,11 @@
     <string name="app_name">Dialogflow</string>
     <string name="btn_record">Record</string>
     <string name="btn_stop">Stop</string>
+    <string name="email_hint">Email</string>
+    <string name="phone_number_hint">Phone number</string>
+    <string name="password_hint">Password</string>
+    <string name="confirm_password_hint">Confirm password</string>
+    <string name="register">Registrate</string>
+    <string name="error_title">Error</string>
+    <string name="unknown_intent_message">Sorry, but I could not recognize this action. Please try one more time</string>
 </resources>
